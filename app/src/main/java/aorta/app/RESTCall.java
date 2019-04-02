@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Authentication {
+public class RESTCall {
 
     private String baseUrl;
     private String username;
@@ -34,7 +34,7 @@ public class Authentication {
      * @param username String
      * @param password String
      */
-    public Authentication(String  baseUrl, String username, String password) {
+    public RESTCall(String  baseUrl, String username, String password) { // constructor for login
         setBaseUrl(baseUrl);
         this.username = username;
         this.password = password;
@@ -49,12 +49,25 @@ public class Authentication {
         System.setProperty("jsse.enableSNIExtension", "false");
     }
 
+    public RESTCall(String  baseUrl) {
+        setBaseUrl(baseUrl);
+        this.urlResource = "rest_service";
+        this.urlPath = "";
+        this.httpMethod = "GET";
+        parameters = new HashMap<>();
+        lastResponse = "";
+        payload = "";
+        headerFields = new HashMap<>();
+        // This is important. The application may break without this line.
+        System.setProperty("jsse.enableSNIExtension", "false");
+    }
+
     /**
      * --&gt;http://BASE_URL.COM&lt;--/resource/path
      * @param baseUrl the root part of the URL
      * @return this
      */
-    public Authentication setBaseUrl(String baseUrl) {
+    public RESTCall setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
         if (!baseUrl.substring(baseUrl.length() - 1).equals("/")) {
             this.baseUrl += "/";
@@ -67,7 +80,7 @@ public class Authentication {
      * @param urlResource http://base_url.com/--&gt;URL_RESOURCE&lt;--/url_path
      * @return this
      */
-    public Authentication setUrlResource(String urlResource) {
+    public RESTCall setUrlResource(String urlResource) {
         this.urlResource = urlResource;
         return this;
     }
@@ -78,7 +91,7 @@ public class Authentication {
      * @param urlPath http://base_url.com/resource/--&gt;URL_PATH&lt;--
      * @return this
      */
-    public final Authentication setUrlPath(String urlPath) {
+    public final RESTCall setUrlPath(String urlPath) {
         this.urlPath = urlPath;
         return this;
     }
@@ -88,7 +101,7 @@ public class Authentication {
      * GET, PUT, POST, or DELETE
      * @return this
      */
-    public Authentication setHttpMethod(String httpMethod) {
+    public RESTCall setHttpMethod(String httpMethod) {
         this.httpMethod = httpMethod;
         return this;
     }
@@ -114,7 +127,7 @@ public class Authentication {
      * @param parameters
      * @return this
      */
-    public Authentication setParameters(HashMap<String, String> parameters) {
+    public RESTCall setParameters(HashMap<String, String> parameters) {
         this.parameters = parameters;
         return this;
     }
@@ -125,7 +138,7 @@ public class Authentication {
      * @param value the value of the parameter
      * @return this
      */
-    public Authentication setParameter(String key, String value) {
+    public RESTCall setParameter(String key, String value) {
         this.parameters.put(key, value);
         return this;
     }
@@ -134,7 +147,7 @@ public class Authentication {
      * Delete all parameters that are set for the Rest API call.
      * @return this
      */
-    public Authentication clearParameters() {
+    public RESTCall clearParameters() {
         this.parameters.clear();
         return this;
     }
@@ -143,7 +156,7 @@ public class Authentication {
      * Remove a specified parameter
      * @param key the name of the parameter to remove
      */
-    public Authentication removeParameter(String key) {
+    public RESTCall removeParameter(String key) {
         this.parameters.remove(key);
         return this;
     }
@@ -152,7 +165,7 @@ public class Authentication {
      * Deletes all values used to make Rest API calls.
      * @return this
      */
-    public Authentication clearAll() {
+    public RESTCall clearAll() {
         parameters.clear();
         baseUrl = "";
         this.username = "";
@@ -221,7 +234,6 @@ public class Authentication {
     public String execute() {
         String line;
         StringBuilder outputStringBuilder = new StringBuilder();
-        String token = null;
 
         try {
             StringBuilder urlString = new StringBuilder(baseUrl + urlResource);
@@ -268,8 +280,6 @@ public class Authentication {
 
                 headerFields = connection.getHeaderFields();
 
-                token = headerFields.get("Authorization").get(0);
-
                 //connection.
                 BufferedReader in = new BufferedReader(new InputStreamReader(content));
 
@@ -285,7 +295,6 @@ public class Authentication {
         if (!outputStringBuilder.toString().equals("")) {
             lastResponse = outputStringBuilder.toString();
         }
-
-        return token;
+        return outputStringBuilder.toString();
     }
 }

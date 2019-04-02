@@ -1,5 +1,7 @@
 package aorta.app;
 
+import android.net.Credentials;
+import android.net.wifi.hotspot2.pps.Credential;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -11,13 +13,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-    private Button button_login_login;
-    private EditText editText_login_username;
-    private EditText editText_login_password;
+    private Button button_login;
+    private EditText editText_username;
+    private EditText editText_password;
     private String username;
     private String password;
     private String baseUrl;
-    private String token;
+    private String token = null;
+    private String tokenSchema;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,31 +28,31 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // TODO: Replace this with your own IP address or URL.
-        baseUrl = "http://192.168.0.104:8080/Project1819-G5REST/";
+        baseUrl = "http://10.110.161.57:8080/Project1819-G5REST/";
 
-        editText_login_username = (EditText) findViewById(R.id.text_login);
-        editText_login_password = (EditText) findViewById(R.id.text_password);
+        editText_username = (EditText) findViewById(R.id.text_login);
+        editText_password = (EditText) findViewById(R.id.text_password);
 
-        button_login_login = (Button) findViewById(R.id.button_login);
+        button_login = (Button) findViewById(R.id.button_login);
 
-        button_login_login.setOnClickListener(new View.OnClickListener() {
+        button_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
 
-                    username = editText_login_username.getText().toString();
-                    password = editText_login_password.getText().toString();
+                    username = editText_username.getText().toString();
+                    password = editText_password.getText().toString();
 
-                    Authentication apiAuthenticationClient =
-                            new Authentication(
+                    RESTCall loginCall =
+                            new RESTCall(
                                     baseUrl
                                     , username
                                     , password
                             );
-                    apiAuthenticationClient.setParameter("login", username);
-                    apiAuthenticationClient.setParameter("password", password);
+                    loginCall.setParameter("login", username);
+                    loginCall.setParameter("password", password);
 
-                    AsyncTask<Void, Void, String> execute = new ExecuteNetworkOperation(apiAuthenticationClient);
+                    AsyncTask<Void, Void, String> execute = new ExecuteNetworkOperation(loginCall);
                     execute.execute();
                 } catch (Exception ex) {
 
@@ -63,15 +66,13 @@ public class MainActivity extends AppCompatActivity {
      * It starts the progress bar, makes the API call, and ends the progress bar.
      */
     public class ExecuteNetworkOperation extends AsyncTask<Void, Void, String> {
-
-        private Authentication apiAuthenticationClient;
-        private String isValidCredentials;
+        private RESTCall restCall;
 
         /**
          * Overload the constructor to pass objects to this class.
          */
-        public ExecuteNetworkOperation(Authentication apiAuthenticationClient) {
-            this.apiAuthenticationClient = apiAuthenticationClient;
+        public ExecuteNetworkOperation(RESTCall restCall) {
+            this.restCall = restCall;
         }
 
         @Override
@@ -85,7 +86,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(Void... params) {
             try {
-                isValidCredentials = apiAuthenticationClient.execute();
+                restCall.execute();
+                String[] strList = restCall.getHeaderFields().get("Authorization").get(0).split(" ");
+                token = strList[1];
+                tokenSchema = strList[0];
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -100,26 +105,28 @@ public class MainActivity extends AppCompatActivity {
             findViewById(R.id.loadingPanel).setVisibility(View.GONE);
 
             // Login Success
-            if (isValidCredentials != null) {
-                goToSecondActivity();
+            if (token != null) {
+                goToHomeActivity();
             }
             // Login Failure
             else {
+                // Temporary message dat je niet inglogd bent.
                 Toast.makeText(getApplicationContext(), "Login Failed", Toast.LENGTH_LONG).show();
             }
         }
     }
 
     /**
-     * Open a new activity window.
+     * Open a new activity.
      */
-    private void goToSecondActivity() {
+    private void goToHomeActivity() {
         Bundle bundle = new Bundle();
         bundle.putString("username", username);
         bundle.putString("password", password);
+        bundle.putString("token", token);
         bundle.putString("baseUrl", baseUrl);
 
-        Intent intent = new Intent(this, SecondActivity.class);
+        Intent intent = new Intent(this, HomeActivity.class);
         intent.putExtras(bundle);
         startActivity(intent);
     }
