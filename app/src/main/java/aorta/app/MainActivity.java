@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // TODO: Replace this with your own IP address or URL.
-        baseUrl = "http://10.110.161.57:8080/Project1819-G5REST/";
+        baseUrl = "http://10.110.162.52:8080/Project1819-G5REST/";
 
         editText_username = (EditText) findViewById(R.id.text_login);
         editText_password = (EditText) findViewById(R.id.text_password);

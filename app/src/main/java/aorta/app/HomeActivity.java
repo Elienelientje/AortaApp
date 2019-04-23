@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -14,7 +15,7 @@ public class HomeActivity extends AppCompatActivity {
     Button button_logout;
     Button button_scan_location;
     TextView mResultTextView;
-    private int BARCODE_READER_REQUEST_CODE = 1;
+    private static final int BARCODE_READER_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,12 +62,16 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     public  void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == BARCODE_READER_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
                 if (data != null) {
                     String barcode = "test";
                     mResultTextView.setText(barcode);
                 } else
                     mResultTextView.setText("No barcode captured");
-
+            }
+            else {
+                Log.e("tag","Het werkt niet! :O");
+            }
         } else
             super.onActivityResult(requestCode, resultCode, data);
     }
