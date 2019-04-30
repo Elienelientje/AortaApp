@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // TODO: Replace this with your own IP address or URL.
-        baseUrl = "http://10.110.162.52:8080/Project1819-G5REST/";
+        baseUrl = "http://192.168.0.104:8080/Project1819-G5REST/";
 
         editText_username = (EditText) findViewById(R.id.text_login);
         editText_password = (EditText) findViewById(R.id.text_password);
@@ -43,17 +43,22 @@ public class MainActivity extends AppCompatActivity {
                     username = editText_username.getText().toString();
                     password = editText_password.getText().toString();
 
-                    RESTCall loginCall =
-                            new RESTCall(
-                                    baseUrl
-                                    , username
-                                    , password
-                            );
-                    loginCall.setParameter("login", username);
-                    loginCall.setParameter("password", password);
+                    // TODO remove debug option.
+                    if (!username.equals("debug")) {
+                        RESTCall loginCall =
+                                new RESTCall(
+                                        baseUrl
+                                        , username
+                                        , password
+                                );
+                        loginCall.setParameter("login", username);
+                        loginCall.setParameter("password", password);
 
-                    AsyncTask<Void, Void, String> execute = new ExecuteNetworkOperation(loginCall);
-                    execute.execute();
+                        AsyncTask<Void, Void, String> execute = new ExecuteNetworkOperation(loginCall);
+                        execute.execute();
+                    } else {
+                        goToHomeActivity();
+                    }
                 } catch (Exception ex) {
 
                 }
